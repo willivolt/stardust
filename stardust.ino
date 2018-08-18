@@ -1,12 +1,15 @@
 #include "FastLED.h"
+#include "Bounce2.h"
 
 #define PATTERN_CHANGE_TIME_MS 60000
-#define STAR_TIME_MIN 10000
-#define STAR_TIME_MAX 60000
+#define STAR_TIME_MIN 3 // Minutes
+#define STAR_TIME_MAX 10 // Minutes
 #define STAR_SPEED_MS 4
 
 #define LED_PIN 13
 #define MAX_PATTERN 3
+#define PIR_PIN 23
+#define BUTTON_PIN 22
 
 // DotStar strips
 #define BENCH_LED_TYPE APA102
@@ -63,6 +66,7 @@ CLEDController* lowerBenchController = NULL;
 CLEDController* portalController = NULL;
 CLEDController* starController = NULL;
 CLEDController* fiberController = NULL;
+Bounce pushbutton = Bounce(BUTTON_PIN, 10);
 
 byte colorIndex = 0;
 byte pattern = 0;
@@ -73,11 +77,13 @@ int starIndex = -1;
 short portalIndex = 0;
 
 void setup() {
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  pinMode(PIR_PIN, INPUT);
   randomSeed(analogRead(12));
   // To save power, set pins to output and stop serial.
-  for (byte pin = 0; pin < 27; pin++) {
-    pinMode(LED_PIN, OUTPUT);
-  }
+  //  for (byte pin = 0; pin < 27; pin++) {
+  //    pinMode(LED_PIN, OUTPUT);
+  //  }
   Serial.end();
   //Serial.begin(9600);
   pinMode(LED_PIN, OUTPUT);
@@ -200,11 +206,18 @@ void rainbowTube(byte baseIndex) {
 
 void loop() {
   // Activate the shooting star randomly in a period from 10 to 60 seconds
-  EVERY_N_MILLISECONDS_I(starTimer, STAR_TIME_MIN) {
+  EVERY_N_MINUTES_I(starTimer, STAR_TIME_MIN) {
     if (starIndex < 0) {
       starIndex = 0;
     }
     starTimer.setPeriod(random(STAR_TIME_MIN, STAR_TIME_MAX));
+  }
+
+  // Button activates shooting star
+  if (pushbutton.update() && (starIndex < 0)) {
+    if (pushbutton.fallingEdge()) {
+      starIndex = 0;
+    }
   }
 
   // If the shooting star is running, incriment to the next pixel
@@ -231,7 +244,7 @@ void loop() {
       int bright = map(switchIndex, 64, 127, 0, 255);
       FastLED.setBrightness(bright);
       if (switchIndex == 64) {
-        portalClockwise = !portalClockwise;
+        //portalClockwise = !portalClockwise;
         if (pattern == MAX_PATTERN) {
           pattern = 0;
         } else {
@@ -331,8 +344,11 @@ void loop() {
     switchIndex = 127;
   }
 
+  portalClockwise = (LOW == digitalRead(PIR_PIN));
+
   // Blink the Teensy LED so that we know it is alive
-  EVERY_N_MILLISECONDS(1000) {
-    digitalWrite(LED_PIN, !digitalRead(LED_PIN));
-  }
+  //  EVERY_N_MILLISECONDS(1000) {
+  //    digitalWrite(LED_PIN, !digitalRead(LED_PIN));
+  //  }
+  digitalWrite(LED_PIN, digitalRead(PIR_PIN));
 }
