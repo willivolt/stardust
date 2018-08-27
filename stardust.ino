@@ -259,18 +259,22 @@ void loop() {
     }
 
     CRGB baseColor = rainbowColor(colorIndex);
-    for (byte i = 0; i < 3; i++) {
-      fill_solid(&(fiberLeds[i * 3]), NUM_FIBER_LEDS / 3, rainbowColor(colorIndex + (85 * i)));
-    }
     if (0 == pattern) {
       baseTime.setPeriod(45);
       fill_solid(&(upperLeds[0]), NUM_UPPER_BENCH_LEDS, baseColor);
       rainbowTube(colorIndex);
       fill_rainbow(&(lowerLeds[0]), NUM_LOWER_BENCH_LEDS, colorIndex, 4);
+      for (byte i = 0; i < NUM_FIBER_LEDS; i++) {
+        fill_solid(&(fiberLeds[i]), 1, rainbowColor(colorIndex + (42 * i)));
+      }
+
     } else if (1 == pattern) {
       baseTime.setPeriod(240);
       //fill_solid(&(upperLeds[NUM_UPPER_BENCH_LEDS]), NUM_TUBE_LEDS, baseColor);
       rainbowTube(colorIndex);
+      for (byte i = 0; i < 3; i++) {
+        fill_solid(&(fiberLeds[i * 3]), NUM_FIBER_LEDS / 3, rainbowColor(colorIndex + (85 * i)));
+      }
       for (byte i = 0; i < 18; i++) {
         CRGB nextColor = rainbowColor(colorIndex + i);
         fill_solid(&(upperLeds[8 * i]), 8, nextColor);
@@ -278,12 +282,15 @@ void loop() {
       }
     } else if (2 == pattern) {
       baseTime.setPeriod(45);
-      fill_solid(&(upperLeds[0]), NUM_UPPER_BENCH_LEDS, baseColor);
       CRGB nextColor = rainbowColor(colorIndex + 128);
+      fill_solid(&(fiberLeds[0]), NUM_FIBER_LEDS, baseColor);
       fill_solid(&(upperLeds[NUM_UPPER_BENCH_LEDS]), NUM_TUBE_LEDS, nextColor);
+      fill_solid(&(upperLeds[0]), NUM_UPPER_BENCH_LEDS, baseColor);
       fill_solid(&(lowerLeds[0]), NUM_LOWER_BENCH_LEDS, nextColor);
     } else {
+      // Everything the same color
       baseTime.setPeriod(45);
+      fill_solid(&(fiberLeds[0]), NUM_FIBER_LEDS, baseColor);
       fill_solid(&(upperLeds[0]), NUM_UPPER_BENCH_LEDS + NUM_TUBE_LEDS, baseColor);
       fill_solid(&(lowerLeds[0]), NUM_LOWER_BENCH_LEDS, baseColor);
     }
