@@ -1,5 +1,6 @@
-#include "FastLED.h"
 #include "Bounce2.h"
+//#define FASTLED_ALLOW_INTERRUPTS 0
+#include "FastLED.h"
 
 #define PATTERN_CHANGE_TIME_MS 60000
 #define STAR_TIME_MIN 3 // Minutes
@@ -265,9 +266,8 @@ void loop() {
       rainbowTube(colorIndex);
       fill_rainbow(&(lowerLeds[0]), NUM_LOWER_BENCH_LEDS, colorIndex, 4);
       for (byte i = 0; i < NUM_FIBER_LEDS; i++) {
-        fill_solid(&(fiberLeds[i]), 1, rainbowColor(colorIndex + (42 * i)));
+        fill_solid(&(fiberLeds[i]), 1, rainbowColor(colorIndex + (27 * i)));
       }
-
     } else if (1 == pattern) {
       baseTime.setPeriod(240);
       //fill_solid(&(upperLeds[NUM_UPPER_BENCH_LEDS]), NUM_TUBE_LEDS, baseColor);
@@ -305,8 +305,15 @@ void loop() {
       setPortalColumn(portalIndex - i - 1, CRGB::Black);
       setPortalColumn(portalIndex + i + (COLUMNS_PER_PORTAL * 2), CRGB::Black);
     }
-    for (byte i = 0; i < (COLUMNS_PER_PORTAL * 2); i++) {
-      setPortalColumn(portalIndex + i, full);
+    if (0 == pattern) {
+      for (byte i = 0; i < (COLUMNS_PER_PORTAL * 2); i++) {
+        full = rainbowColor(colorIndex+(i*4));      
+        setPortalColumn(portalIndex + i, full);
+      }
+    } else {
+      for (byte i = 0; i < (COLUMNS_PER_PORTAL * 2); i++) {
+        setPortalColumn(portalIndex + i, full);
+      }
     }
     showPortal();
     if (portalClockwise) {
